@@ -1,58 +1,59 @@
 'use strict';
 
-// NOTE:  Encrypt your slack URL (without the 'https://' bit) in an environment 
-// variable called 'kmsEncryptedHookUrl'
+// NOTE:  Pass your slack hook URL in the event JSON like so:
+//
+// {
+//    "hookUrl": "https://hooks.slack.com/services/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"
+// }
 
 const AWS = require('aws-sdk');
 const url = require('url');
 const https = require('https');
 
-// The base-64 encoded, encrypted key (CiphertextBlob) stored in the kmsEncryptedHookUrl environment variable
-const kmsEncryptedHookUrl = process.env.kmsEncryptedHookUrl;
 let hookUrl;
 
 const message = {
-    "text": ":thermometer: <!here> *Time for a Team Temp Check!* <!here> :thermometer: \n _Click as many times as you like, only your last vote will be counted._",
-    "attachments": [
+  "text": ":thermometer: <!here> *Time for a Team Temp Check!* <!here> :thermometer: \n _Click as many times as you like, only your last vote will be counted._",
+  "attachments": [
+    {
+      "text": "How are you feeling this week?",
+      "fallback": "I am unable to understand your feelings. Too deep maybe?",
+      "callback_id": "mood_survey",
+      "color": "#3AA3E3",
+      "actions": [
         {
-            "text": "How are you feeling this week?",
-            "fallback": "I am unable to understand your feelings. Too deep maybe?",
-            "callback_id": "mood_survey",
-            "color": "#3AA3E3",
-            "actions": [
-                {
-                    "name": "mood",
-                    "text": "Good :+1:",
-                    "type": "button",
-                    "value": "good"
-                },
-                {
-                    "name": "mood",
-                    "text": "Meh :neutral_face:",
-                    "type": "button",
-                    "value": "meh"
-                },
-                {
-                    "name": "mood",
-                    "text": "Bad :-1:",
-                    "type": "button",
-                    "value": "bad"
-                },
-                {
-                    "name": "mood",
-                    "text": "Terrible :rage:",
-                    "type": "button",
-                    "value": "terrible"
-                },
-                {
-                    "name": "mood",
-                    "text": "AWESOME!!!   :doge:",
-                    "type": "button",
-                    "value": "awesome"
-                }
-            ]
+          "name": "mood",
+          "text": "Good :+1:",
+          "type": "button",
+          "value": "good"
+        },
+        {
+          "name": "mood",
+          "text": "Meh :neutral_face:",
+          "type": "button",
+          "value": "meh"
+        },
+        {
+          "name": "mood",
+          "text": "Bad :-1:",
+          "type": "button",
+          "value": "bad"
+        },
+        {
+          "name": "mood",
+          "text": "Terrible :rage:",
+          "type": "button",
+          "value": "terrible"
+        },
+        {
+          "name": "mood",
+          "text": "AWESOME!!!   :doge:",
+          "type": "button",
+          "value": "awesome"
         }
-    ]
+      ]
+    }
+  ]
 }
 
 function postMessage(inputData, callback) {
@@ -100,25 +101,9 @@ function processEvent(slackMessage, callback) {
 }
 
 exports.handler = (event, context, callback) => {
-    console.log("Sending a temp check request")
-
-    if (hookUrl) {
-        // Container reuse, simply process with the key in memory
-        processEvent(event, callback);
-    } else if (kmsEncryptedHookUrl && kmsEncryptedHookUrl !== '<kmsEncryptedHookUrl>') {
-        const encryptedBuf = new Buffer(kmsEncryptedHookUrl, 'base64');
-        const cipherText = { CiphertextBlob: encryptedBuf };
-
-        const kms = new AWS.KMS();
-        kms.decrypt(cipherText, (err, data) => {
-            if (err) {
-                console.log('Decrypt error:', err);
-                return callback(err);
-            }
-            hookUrl = `https://${data.Plaintext.toString('ascii')}`;
-            processEvent(event, callback);
-        });
-    } else {
-        callback('Hook URL has not been set.');
-    }
+    console.log("Sending a temp check request");
+    
+    hookUrl = event.hookUrl;
+    
+    processEvent(event, callback);
 };
