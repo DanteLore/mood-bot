@@ -20,10 +20,18 @@ function moodHistory(svgId, restAddr, color, freq) {
     var xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom");
+    svg.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
 
     var yAxis = d3.svg.axis()
         .scale(y)
         .orient("right");
+    svg.append("g")
+        .attr("class", "axis axis--y")
+        .attr("transform", "translate(" + width + ",0)")
+            .call(yAxis);
 
     fetchData();
 
@@ -48,6 +56,12 @@ function moodHistory(svgId, restAddr, color, freq) {
 
         x.domain(layers[0].map(function (d) { return d.x; }));
         y.domain([0, d3.max(layers[layers.length - 1], function (d) { return d.y0 + d.y; })]).nice();
+
+        svg.select(".axis--x")
+            .call(xAxis);
+
+        svg.select(".axis--y")
+            .call(yAxis);
 
         var layer = svg.selectAll(".layer")
             .data(layers)
@@ -82,15 +96,5 @@ function moodHistory(svgId, restAddr, color, freq) {
             .attr("width", x.rangeBand() - 1);
 
         bars.exit().remove();
-
-        svg.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("class", "axis axis--y")
-            .attr("transform", "translate(" + width + ",0)")
-            .call(yAxis);
     }
 }
