@@ -81,13 +81,26 @@
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="mood-pie.js"></script>
   <script src="mood-history.js"></script>
+
+  <script>
+    function getParameterByName(name) {
+      var url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results || !results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+  </script>
+
   <script>
     var color = d3.scale.ordinal()
       .domain(["terrible", "bad", "meh", "good", "awesome"])
       .range(['blueviolet', 'steelblue', 'lightsteelblue', 'lime', 'greenyellow']);
     var freq = 10000;
-    moodPie('pie', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot/', color, freq);
-    moodHistory('history', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot/history/', color, freq);
+    var channel_id = getParameterByName("channel_id");
+    moodPie('pie', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot?channel_id=' + channel_id, color, freq);
+    moodHistory('history', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot/history?channel_id=' + channel_id, color, freq);
   </script>
 </body>
 

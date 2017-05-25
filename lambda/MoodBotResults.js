@@ -2,6 +2,8 @@
 
 var AWS = require("aws-sdk");
 
+let channel_id;
+
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 Array.prototype.countBy = function (key) {
@@ -21,16 +23,21 @@ Date.prototype.previousWeek = function () {
 };
 
 function forWeek(week) {
+    var expression = "#wk = :week";
+    var attrs = { ":week": week };
+    if (channel_id) {
+        expression += " and channel_id = :chan";
+        attrs[":chan"] = channel_id;
+    }
+
     return {
         TableName: "MoodResponses",
-        IndexName: 'week-user_id-index',
-        KeyConditionExpression: "#wk = :week",
+        IndexName: 'week-channel_id-index',
+        KeyConditionExpression: expression,
         ExpressionAttributeNames: {
             "#wk": "week"
         },
-        ExpressionAttributeValues: {
-            ":week": week
-        }
+        ExpressionAttributeValues: attrs
     };
 }
 
@@ -53,15 +60,15 @@ function happinessMetric(moods) {
 
 function overallMood(happiness) {
     if (happiness > 200)
-        return "awesome"
+        return "awesome";
     else if (happiness < -200)
-        return "terrible"
+        return "terrible";
     else if (happiness > 50)
-        return "good"
+        return "good";
     else if (happiness < -50)
-        return "bad"
+        return "bad";
     else
-        return "meh"
+        return "meh";
 }
 
 function handleData(data, callback, week) {
@@ -73,7 +80,8 @@ function handleData(data, callback, week) {
         week: week,
         moods: moods,
         happiness: happiness,
-        teamMood: overallMood(happiness)
+        teamMood: overallMood(happiness),
+        channel_id: channel_id
     };
 
     callback(null, results);
@@ -95,5 +103,7 @@ function runFor(date, tries, callback) {
 }
 
 exports.handler = function (event, context, callback) {
+    channel_id = event.channel_id;
+
     runFor(new Date(), 1, callback);
 };

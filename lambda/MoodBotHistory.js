@@ -2,6 +2,8 @@
 
 var AWS = require("aws-sdk");
 
+let channel_id;
+
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 Array.prototype.countBy = function (key) {
@@ -28,16 +30,21 @@ Date.prototype.subtractWeeks = function (wks) {
 };
 
 function sinceWeek(week) {
+    var expression = "#wk >= :week";
+    var attrs = { ":week": week };
+    if (channel_id) {
+        expression += " and channel_id = :chan";
+        attrs[":chan"] = channel_id;
+    }
+
     return {
         TableName: "MoodResponses",
-        IndexName: 'week-user_id-index',
-        FilterExpression: "#wk >= :week",
+        IndexName: 'week-channel_id-index',
+        FilterExpression: expression,
         ExpressionAttributeNames: {
             "#wk": "week"
         },
-        ExpressionAttributeValues: {
-            ":week": week
-        }
+        ExpressionAttributeValues: attrs
     };
 }
 
@@ -75,5 +82,7 @@ function runFor(start, callback) {
 }
 
 exports.handler = function (event, context, callback) {
+    channel_id = event.channel_id;
+
     runFor(new Date().subtractWeeks(10), callback);
 };
