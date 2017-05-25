@@ -69,11 +69,15 @@
     .axis--x path {
       display: none;
     }
+
+    h1 {
+      writing-mode: tb-rl;
+    }
   </style>
 </head>
 
 <body>
-  <!--h1>Team Mood</h1-->
+  <h1>Team Mood</h1>
 
   <svg id="pie" height="60%" width="95%" position="absolute"></svg>
   <svg id="history" height="40%" width="95%" position="absolute"></svg>
@@ -96,7 +100,10 @@
   <script>
     var color = d3.scale.ordinal()
       .domain(["terrible", "bad", "meh", "good", "awesome"])
-      .range(['blueviolet', 'steelblue', 'lightsteelblue', 'lime', 'greenyellow']);
+      //.range(['blueviolet', 'steelblue', 'lightsteelblue', 'lime', 'greenyellow']);
+      //.range(['#7b3294', '#c2a5cf', '#f7f7f7', '#a6dba0', '#008837']);
+      .range(['#d7191c', '#fdae61', '#ffffbf', '#a6d96a', '#1a9641']);
+
     var freq = 10000;
     var channel_id = getParameterByName("channel_id");
     moodPie('pie', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot?channel_id=' + channel_id, color, freq);
