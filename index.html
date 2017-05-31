@@ -77,7 +77,7 @@
 </head>
 
 <body>
-  <h1>Team Mood</h1>
+  <h1 id="title">Mood</h1>
 
   <svg id="pie" height="60%" width="95%" position="absolute"></svg>
   <svg id="history" height="40%" width="95%" position="absolute"></svg>
@@ -87,6 +87,11 @@
   <script src="mood-history.js"></script>
 
   <script>
+    Date.prototype.getWeek = function () {
+      var onejan = new Date(this.getFullYear(), 0, 1);
+      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    };
+
     function getParameterByName(name) {
       var url = window.location.href;
       name = name.replace(/[\[\]]/g, "\\$&");
@@ -94,6 +99,14 @@
         results = regex.exec(url);
       if (!results || !results[2]) return '';
       return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    function updateWeek(freq) {
+      document.getElementById("title").textContent = "Week " + new Date().getWeek();
+
+      setTimeout(function () {
+        updateWeek(freq);
+      }, freq);
     }
   </script>
 
@@ -106,6 +119,7 @@
 
     var freq = 10000;
     var channel_id = getParameterByName("channel_id");
+    updateWeek(freq);
     moodPie('pie', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot?channel_id=' + channel_id, color, freq);
     moodHistory('history', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot/history?channel_id=' + channel_id, color, freq);
   </script>
