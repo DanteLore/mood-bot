@@ -114,9 +114,10 @@
   <script>
     var color = d3.scale.ordinal()
       .domain(["terrible", "bad", "meh", "good", "awesome"])
+      .range(['red', 'orange', 'yellow', 'lime', 'green']);
       //.range(['blueviolet', 'steelblue', 'lightsteelblue', 'lime', 'greenyellow']);
       //.range(['#7b3294', '#c2a5cf', '#f7f7f7', '#a6dba0', '#008837']);
-      .range(['#d7191c', '#fdae61', '#ffffbf', '#a6d96a', '#1a9641']);
+      //.range(['#d7191c', '#fdae61', '#ffffbf', '#a6d96a', '#1a9641']);
 
     var freq = 10000;
     var channel_id = getParameterByName("channel_id");
