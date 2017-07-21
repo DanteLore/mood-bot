@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="refresh" content="1200;url=index.html">
+  <title>Team Mood</title>
+
+  <meta charset="utf-8">
+  <link href="https://bootswatch.com/cyborg/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 20px;
+      background: white;
+      color: black;
+    }
+
+    #pie {
+      position: absolute;
+      top: 1%;
+      left: 1%;
+      width: 98%;
+      height: 58%;
+    }
+
+    #history {
+      position: absolute;
+      top: 60%;
+      left: 1%;
+      width: 98%;
+      height: 38%;
+    }
+
+    text {
+      color: black;
+      fill: black;
+      font-size: 1.5em;
+      text-transform: capitalize;
+    }
+
+    .score {
+      color: black;
+      fill: black;
+      font-size: 2em;
+      text-transform: capitalize;
+    }
+
+    path.slice {
+      stroke-width: 2px;
+    }
+
+    polyline {
+      opacity: .6;
+      stroke: black;
+      stroke-width: 3px;
+      fill: none;
+    }
+
+    .axis text {
+      font: 10px sans-serif;
+      color: black;
+    }
+
+    .axis line,
+    .axis path {
+      fill: none;
+      stroke: black;
+    }
+
+    .axis--x path {
+      display: none;
+    }
+
+    h1 {
+      writing-mode: tb-rl;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 id="title">Mood</h1>
+
+  <svg id="pie" height="60%" width="95%" position="absolute"></svg>
+  <svg id="history" height="40%" width="95%" position="absolute"></svg>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="mood-pie.js"></script>
+  <script src="mood-history.js"></script>
+
+  <script>
+    Date.prototype.getWeek = function () {
+      var onejan = new Date(this.getFullYear(), 0, 1);
+      return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    };
+
+    function getParameterByName(name) {
+      var url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results || !results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    function updateWeek(freq) {
+      document.getElementById("title").textContent = "Week " + new Date().getWeek();
+
+      setTimeout(function () {
+        updateWeek(freq);
+      }, freq);
+    }
+  </script>
+
+  <script>
+    var color = d3.scale.ordinal()
+      .domain(["terrible", "bad", "meh", "good", "awesome"])
+      .range(['red', 'orange', 'yellow', 'lime', 'green']);
+      //.range(['blueviolet', 'steelblue', 'lightsteelblue', 'lime', 'greenyellow']);
+      //.range(['#7b3294', '#c2a5cf', '#f7f7f7', '#a6dba0', '#008837']);
+      //.range(['#d7191c', '#fdae61', '#ffffbf', '#a6d96a', '#1a9641']);
+
+    var freq = 10000;
+    var channel_id = getParameterByName("channel_id");
+    updateWeek(freq);
+    moodPie('pie', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot?channel_id=' + channel_id, color, freq);
+    moodHistory('history', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot/history?channel_id=' + channel_id, color, freq);
+  </script>
+</body>
+
+</html>
