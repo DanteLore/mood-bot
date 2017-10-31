@@ -123,6 +123,10 @@
     updateWeek(freq);
     moodPie('pie', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot?channel_id=' + channel_id, color, freq);
     moodHistory('history', 'https://jm26tdr6a6.execute-api.us-west-2.amazonaws.com/test/mood-bot/history?channel_id=' + channel_id, color, freq);
+
+    setTimeout(function () {
+      location.reload();
+    }, 1000 * 60 * 15);
   </script>
 </body>
 

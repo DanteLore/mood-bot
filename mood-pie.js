@@ -21,7 +21,7 @@ function moodPie(svgId, restAddr, color, freq) {
 
 	var pie = d3.layout.pie()
 		.sort(null)
-		.value(function(d) { return d.value; });
+		.value(function (d) { return d.value; });
 
 	var arc = d3.svg.arc()
 		.outerRadius(radius * 0.8)
@@ -33,22 +33,22 @@ function moodPie(svgId, restAddr, color, freq) {
 
 	svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-	var key = function(d){ return d.data.label; };
+	var key = function (d) { return d.data.label; };
 
 	function fetchData() {
-		d3.json(restAddr, function(error, jsonData) {
+		d3.json(restAddr, function (error, jsonData) {
 			var data = Object.keys(jsonData.moods)
-			.map(function(key) {
-				return {
-					label: key,
-					value: jsonData.moods[key]
+				.map(function (key) {
+					return {
+						label: key,
+						value: jsonData.moods[key]
 					};
-			})
+				})
 
 			updatePie(data, jsonData.teamMood);
 
-			setTimeout(function(){
-			fetchData();
+			setTimeout(function () {
+				fetchData();
 			}, freq);
 		});
 	}
@@ -68,16 +68,16 @@ function moodPie(svgId, restAddr, color, freq) {
 
 		slice.enter()
 			.insert("path")
-			.style("fill", function(d) { return color(d.data.label); })
+			.style("fill", function (d) { return color(d.data.label); })
 			.attr("class", "slice");
 
-		slice		
+		slice
 			.transition().duration(1000)
-			.attrTween("d", function(d) {
+			.attrTween("d", function (d) {
 				this._current = this._current || d;
 				var interpolate = d3.interpolate(this._current, d);
 				this._current = interpolate(0);
-				return function(t) {
+				return function (t) {
 					return arc(interpolate(t));
 				};
 			})
@@ -92,36 +92,36 @@ function moodPie(svgId, restAddr, color, freq) {
 		text.enter()
 			.append("text")
 			.attr("dy", ".35em")
-			.text(function(d) {
+			.text(function (d) {
 				return d.data.label + " (" + d.data.value + ")";
 			});
-		
-		function midAngle(d){
-			return d.startAngle + (d.endAngle - d.startAngle)/2;
+
+		function midAngle(d) {
+			return d.startAngle + (d.endAngle - d.startAngle) / 2;
 		}
 
 		text.transition().duration(1000)
-			.text(function(d) {
+			.text(function (d) {
 				return d.data.label + " (" + d.data.value + ")";
 			})
-			.attrTween("transform", function(d) {
+			.attrTween("transform", function (d) {
 				this._current = this._current || d;
 				var interpolate = d3.interpolate(this._current, d);
 				this._current = interpolate(0);
-				return function(t) {
+				return function (t) {
 					var d2 = interpolate(t);
 					var pos = outerArc.centroid(d2);
 					pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
-					return "translate("+ pos +")";
+					return "translate(" + pos + ")";
 				};
 			})
-			.styleTween("text-anchor", function(d){
+			.styleTween("text-anchor", function (d) {
 				this._current = this._current || d;
 				var interpolate = d3.interpolate(this._current, d);
 				this._current = interpolate(0);
-				return function(t) {
+				return function (t) {
 					var d2 = interpolate(t);
-					return midAngle(d2) < Math.PI ? "start":"end";
+					return midAngle(d2) < Math.PI ? "start" : "end";
 				};
 			});
 
@@ -132,23 +132,23 @@ function moodPie(svgId, restAddr, color, freq) {
 
 		var polyline = svg.select(".lines").selectAll("polyline")
 			.data(pie(data), key);
-		
+
 		polyline.enter()
 			.append("polyline");
 
 		polyline.transition().duration(1000)
-			.attrTween("points", function(d){
+			.attrTween("points", function (d) {
 				this._current = this._current || d;
 				var interpolate = d3.interpolate(this._current, d);
 				this._current = interpolate(0);
-				return function(t) {
+				return function (t) {
 					var d2 = interpolate(t);
 					var pos = outerArc.centroid(d2);
 					pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
 					return [arc.centroid(d2), outerArc.centroid(d2), pos];
-				};			
+				};
 			});
-		
+
 		polyline.exit()
 			.remove();
 	}
