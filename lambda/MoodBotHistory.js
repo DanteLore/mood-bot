@@ -29,6 +29,31 @@ Date.prototype.subtractWeeks = function (wks) {
     return new Date(this.getTime() - (wks * 7 * 24 * 60 * 60 * 1000));
 };
 
+function happinessMetric(moods) {
+    var good = moods.good || 0;
+    var bad = moods.bad || 0;
+    var awesome = moods.awesome || 0;
+    var terrible = moods.terrible || 0;
+    
+    var score = good + (bad * -1) + (awesome * 5) + (terrible * -5);
+    var count = good + bad + awesome + terrible + (moods.meh || 0);
+    
+    return Math.round(score * 100 / count);
+}
+
+function overallMood(happiness) {
+    if(happiness > 200)
+        return "awesome";
+    else if(happiness < -200)
+        return "terrible";
+    else if(happiness > 50)
+        return "good";
+    else if(happiness < -50)
+        return "bad";
+    else
+        return "meh";
+}
+
 function sinceWeek(week) {
     var expression = "#wk >= :week";
     var attrs = { ":week": week };
@@ -62,7 +87,16 @@ function handleData(data, callback, week) {
 
     weeks.forEach(function (wk) {
         var moods = weekData[wk].countBy("mood")
-        results.push({ week: wk, moods: moods });
+        var score = happinessMetric(moods);
+
+        var row = { 
+            week: wk,
+            score: score,
+            teamMood: overallMood(score),
+            moods: moods
+        };
+
+        results.push(row);
     });
 
     callback(null, results);

@@ -23,7 +23,7 @@ function moodHistory(svgId, restAddr, color, freq) {
     svg.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+        .call(xAxis);
 
     var yAxis = d3.svg.axis()
         .scale(y)
@@ -31,7 +31,7 @@ function moodHistory(svgId, restAddr, color, freq) {
     svg.append("g")
         .attr("class", "axis axis--y")
         .attr("transform", "translate(" + width + ",0)")
-            .call(yAxis);
+        .call(yAxis);
 
     fetchData();
 
@@ -77,6 +77,19 @@ function moodHistory(svgId, restAddr, color, freq) {
             .style("fill", function (d, i) {
                 return color(d[0].mood);
             });
+
+        var labels = svg.selectAll(".moodLabel")
+            .data(data);
+
+        labels.enter().append("text")
+            .attr("x", function (d) { return x(d.week) + 4; })
+            .attr("y", height - 4)
+            .attr("class", "barlabel")
+            .text(function (d) {
+                return d.teamMood;
+            });
+            
+        labels.exit().remove();
 
         var bars = layer.selectAll("rect")
             .data(function (d) {
