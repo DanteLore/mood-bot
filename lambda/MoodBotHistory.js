@@ -60,7 +60,7 @@ function sinceWeek(week, year) {
         expression = "(#wk >= :week and #yr = :year) or (#yr > :year)";
     }
     else {
-        expression = "#wk >= :week";
+        expression = "#wk >= :week and #yr = :year";
     }
     
     var attrs = { ":week": week, ":year": year };
