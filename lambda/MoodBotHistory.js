@@ -54,9 +54,16 @@ function overallMood(happiness) {
         return "meh";
 }
 
-function sinceWeek(week) {
-    var expression = "#wk >= :week";
-    var attrs = { ":week": week };
+function sinceWeek(week, year) {
+    var expression;
+    if(year < new Date().getFullYear()) {
+        expression = "(#wk >= :week and #yr = :year) or (#yr > :year)";
+    }
+    else {
+        expression = "#wk >= :week";
+    }
+    
+    var attrs = { ":week": week, ":year": year };
     if (channel_id) {
         expression += " and channel_id = :chan";
         attrs[":chan"] = channel_id;
@@ -67,7 +74,8 @@ function sinceWeek(week) {
         IndexName: 'week-channel_id-index',
         FilterExpression: expression,
         ExpressionAttributeNames: {
-            "#wk": "week"
+            "#wk": "week",
+            "#yr": "year"
         },
         ExpressionAttributeValues: attrs
     };
@@ -82,12 +90,19 @@ function handleData(data, callback, week) {
     console.log("Query succeeded.");
 
     var results = [];
-    var weekData = data.Items.groupBy("week");
+    
+    data.Items.forEach(function (x) {
+        x.yearWeek = "" + x.year + "." + x.week;
+    });
+    
+    var weekData = data.Items.groupBy("yearWeek");
+    
     var weeks = Object.keys(weekData).sort();
 
-    weeks.forEach(function (wk) {
-        var moods = weekData[wk].countBy("mood")
+    weeks.forEach(function (yw) {
+        var moods = weekData[yw].countBy("mood");
         var score = happinessMetric(moods);
+        var wk = yw.split('.')[1];
 
         var row = { 
             week: wk,
@@ -104,9 +119,10 @@ function handleData(data, callback, week) {
 
 function runFor(start, callback) {
     var week = start.getWeek();
-    console.log('Fetching mood results since week: ' + week);
+    var year = start.getFullYear();
+    console.log('Fetching mood results since week: ' + week + " year: " + year);
 
-    docClient.scan(sinceWeek(week), function (err, data) {
+    docClient.scan(sinceWeek(week, year), function (err, data) {
         if (err) {
             handleError(err, callback);
         } else {
