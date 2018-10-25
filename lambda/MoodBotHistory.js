@@ -92,7 +92,7 @@ function handleData(data, callback, week) {
     var results = [];
     
     data.Items.forEach(function (x) {
-        x.yearWeek = "" + x.year + "." + x.week;
+        x.yearWeek = parseInt(x.year) * 100 + parseInt(x.week);
     });
     
     var weekData = data.Items.groupBy("yearWeek");
@@ -102,10 +102,11 @@ function handleData(data, callback, week) {
     weeks.forEach(function (yw) {
         var moods = weekData[yw].countBy("mood");
         var score = happinessMetric(moods);
+        var yr = yw.split('.')[0];
         var wk = yw.split('.')[1];
 
         var row = { 
-            week: wk,
+            week: weekData[yw][0].week,
             score: score,
             teamMood: overallMood(score),
             moods: moods

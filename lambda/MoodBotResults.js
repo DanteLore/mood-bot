@@ -23,8 +23,11 @@ Date.prototype.previousWeek = function() {
 };
 
 function forWeek(week) {
-    var expression = "#wk = :week";
-    var attrs = { ":week": week };
+    var expression = "#wk = :week and #yr = :year";
+    var attrs = { 
+        ":week": week, 
+        ":year": (new Date()).getFullYear() 
+    };
     if(channel_id) {
         expression += " and channel_id = :chan";
         attrs[":chan"] = channel_id;
@@ -35,7 +38,8 @@ function forWeek(week) {
         IndexName: 'week-channel_id-index',
         FilterExpression: expression,
         ExpressionAttributeNames:{
-            "#wk": "week"
+            "#wk": "week",
+            "#yr": "year"
         },
         ExpressionAttributeValues: attrs
     };
